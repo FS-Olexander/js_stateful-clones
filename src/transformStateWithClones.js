@@ -8,24 +8,36 @@
  */
 function transformStateWithClones(state, actions) {
   const massive = [];
-  let newState = { ...state };
+  let stateCopy = { ...state };
 
   for (const action of actions) {
-    if (action.type === 'clear') {
-      newState = {};
-    } else if (action.type === 'addProperties') {
-      newState = { ...newState, ...action.extraData };
-    } else if (action.type === 'removeProperties') {
-      const filteredState = {};
+    switch (action.type) {
+      case 'clear':
+        stateCopy = {};
+        break;
 
-      for (const key in newState) {
-        if (!action.keysToRemove.includes(key)) {
-          filteredState[key] = newState[key];
+      case 'addProperties':
+        stateCopy = { ...stateCopy, ...action.extraData };
+        break;
+
+      case 'removeProperties': {
+        const filteredState = {};
+
+        for (const key in stateCopy) {
+          if (!action.keysToRemove.includes(key)) {
+            filteredState[key] = stateCopy[key];
+          }
         }
+
+        stateCopy = filteredState;
+        break;
       }
-      newState = filteredState;
+
+      default:
+        throw new Error(`Unknown action type: ${action.type}`);
     }
-    massive.push(newState);
+
+    massive.push(stateCopy);
   }
 
   return massive;
